@@ -1612,3 +1612,49 @@ def refresh_ssas(request):
         resp_msg_txt = read_res.text
 
     return HttpResponse(resp_msg_txt)
+
+
+def getPbiAccessToken():
+    formDataVals = {
+        'client_id': 'da2d8409-9e4f-437e-a0f2-2171be2736cf',
+        'grant_type': 'password',
+        'resource': 'https://analysis.windows.net/powerbi/api',
+        'password': '*rajat@7',
+        'username': 'mailto:vikas@g-japan.com',
+        'client_secret': 'ZIR8Q~ORKWYG7C1jrctKBAxj3PIIgb5qE15pFdv6'
+    }
+    result = requests.post('https://login.windows.net/common/oauth2/token', data=formDataVals)
+    return result
+
+
+def getPbiEmbedTokenLoc(group_id, report_id, token):
+    # set form-data
+    formDataVals = '{"accessLevel": "View","allowSaveAs": "true"}'
+    # Send POST
+    pbiurl = 'https://api.powerbi.com/v1.0/myorg/groups/'+group_id+'/reports/'+report_id+'/GenerateToken'
+    result = requests.post(pbiurl, data=formDataVals, headers={'Content-Type': 'application/json',
+                                                               'Authorization': 'Bearer {0}'.format(token)})
+    return result
+
+
+# Get PowerBI Embed management token
+@api_view(['POST'])
+def getPbiEmbedToken(request):
+    group_id = request.POST.get('group_id', '')
+    report_id = request.POST.get('report_id', '')
+    if group_id == "":
+        err_resp = {"error": {"code": "invalid_request",
+                              "message": "The request body must contain the following parameter: 'group_id'."}}
+        return Response(err_resp, status=status.HTTP_400_BAD_REQUEST)
+    elif report_id == "":
+        err_resp = {"error": {"code": "invalid_request",
+                              "message": "The request body must contain the following parameter: 'report_id'."}}
+        return Response(err_resp, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        result = getPbiAccessToken()
+        if result.status_code == 200:
+            resp = result.json()
+            embRes = getPbiEmbedTokenLoc(group_id, report_id, resp['access_token'])
+            return HttpResponse(json.dumps(embRes.json()), status=embRes.status_code)
+        else:
+            return HttpResponse(result.json(), status=result.status_code)

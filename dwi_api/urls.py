@@ -22,5 +22,7 @@ urlpatterns = [
     path('move_blob_to_sql', move_blob_to_sql),
     path('get_tally_connections', tally_connection_list),
     path('add_tally_connection', add_tally_connection),
-    path('refresh_ssas', refresh_ssas)
+    path('refresh_ssas', refresh_ssas),
+    path('getPbiEmbedToken', getPbiEmbedToken)
+
 ]
