@@ -1620,7 +1620,7 @@ def getPbiAccessToken():
         'grant_type': 'password',
         'resource': 'https://analysis.windows.net/powerbi/api',
         'password': '*rajat@7',
-        'username': 'mailto:vikas@g-japan.com',
+        'username': 'vikas@g-japan.com',
         'client_secret': 'ZIR8Q~ORKWYG7C1jrctKBAxj3PIIgb5qE15pFdv6'
     }
     result = requests.post('https://login.windows.net/common/oauth2/token', data=formDataVals)
@@ -1628,6 +1628,7 @@ def getPbiAccessToken():
 
 
 def getPbiEmbedTokenLoc(group_id, report_id, token):
+    print(group_id,report_id,token)
     # set form-data
     formDataVals = '{"accessLevel": "View","allowSaveAs": "true"}'
     # Send POST
@@ -1640,8 +1641,10 @@ def getPbiEmbedTokenLoc(group_id, report_id, token):
 # Get PowerBI Embed management token
 @api_view(['POST'])
 def getPbiEmbedToken(request):
-    group_id = request.POST.get('group_id', '')
-    report_id = request.POST.get('report_id', '')
+    #group_id = request.POST.get('group_id')
+    #report_id = request.POST.get('report_id')
+    group_id = 'e085b90f-df00-4943-b400-e21f3014fd70'
+    report_id = 'ecdb7fa1-79f3-4d29-9fc6-8b62666b7d7f'
     if group_id == "":
         err_resp = {"error": {"code": "invalid_request",
                               "message": "The request body must contain the following parameter: 'group_id'."}}
@@ -1652,6 +1655,7 @@ def getPbiEmbedToken(request):
         return Response(err_resp, status=status.HTTP_400_BAD_REQUEST)
     else:
         result = getPbiAccessToken()
+
         if result.status_code == 200:
             resp = result.json()
             embRes = getPbiEmbedTokenLoc(group_id, report_id, resp['access_token'])
